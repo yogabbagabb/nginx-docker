@@ -1,12 +1,23 @@
-# syntax=docker/dockerfile:1
+FROM python:3.6-slim
 
-FROM python:3.8-slim-buster
+COPY . /srv/flask_app
 
-WORKDIR /python-docker
+WORKDIR /srv/flask_app
+RUN apt-get clean \
 
-COPY requirements.txt requirements.txt
-RUN pip3 install -r requirements.txt
+    && apt-get -y update
 
-COPY . .
 
-CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
+
+RUN apt-get -y install nginx \
+
+    && apt-get -y install python3-dev \
+
+    && apt-get -y install build-essential
+
+RUN pip install -r requirements.txt --src /usr/local/src
+COPY nginx.conf /etc/nginx
+
+RUN chmod +x ./start.sh
+
+CMD ["./start.sh"]
